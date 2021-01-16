@@ -43,7 +43,7 @@
           label="操作">
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
-            <!--<el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
+            <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>
           </template>
         </el-table-column>
 
@@ -143,6 +143,11 @@
             addFormFlag:false,
           }
         },methods:{
+        delBrand:function(id){
+          this.$axios.post("http://localhost:8080/api/shopData/del?id="+id).then(res=>{
+            this.queryData(1)
+          }).catch(err=>console.log(err))
+        },
         toupdate:function(row){
           this.$axios.post("http://localhost:8080/api/shopData/queryByid?id="+row.id).then(res=>{
             this.addForm=res.data.data
