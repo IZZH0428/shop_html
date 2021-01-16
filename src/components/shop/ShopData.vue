@@ -42,8 +42,8 @@
           prop="id"
           label="操作">
           <template slot-scope="scope">
-           <!-- <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
-            <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
+            <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
+            <!--<el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
           </template>
         </el-table-column>
 
@@ -93,15 +93,15 @@
           </el-form-item>
 
           <el-form-item label="属性类型" prop="type">
-            <el-radio v-model="addForm.type" label="0">下拉框</el-radio>
-            <el-radio v-model="addForm.type" label="1">单选框</el-radio>
-            <el-radio v-model="addForm.type" label="2">复选框</el-radio>
-            <el-radio v-model="addForm.type" label="3">输入框</el-radio>
+            <el-radio v-model="addForm.type" :label="0">下拉框</el-radio>
+            <el-radio v-model="addForm.type" :label="1">单选框</el-radio>
+            <el-radio v-model="addForm.type" :label="2">复选框</el-radio>
+            <el-radio v-model="addForm.type" :label="3">输入框</el-radio>
           </el-form-item>
 
           <el-form-item label="是否为SKU" prop="isSKU">
-            <el-radio v-model="addForm.isSKU" label="0">是</el-radio>
-            <el-radio v-model="addForm.isSKU" label="1">否</el-radio>
+            <el-radio v-model="addForm.isSKU" :label="0">是</el-radio>
+            <el-radio v-model="addForm.isSKU" :label="1">否</el-radio>
           </el-form-item>
 
 
@@ -143,14 +143,29 @@
             addFormFlag:false,
           }
         },methods:{
+        toupdate:function(row){
+          this.$axios.post("http://localhost:8080/api/shopData/queryByid?id="+row.id).then(res=>{
+            this.addForm=res.data.data
+            this.queryData(1)
+          }).catch(err=>console.log(err))
+          this.addFormFlag=true
+        },
         toadd:function(){
+            this.addForm={};
             this.addFormFlag=true
         },addShopData:function(){
           console.log(this.addForm)
-          this.$axios.post("http://localhost:8080/api/shopData/add",this.$qs.stringify(this.addForm)).then(res=>{
-            this.addFormFlag=false
-            this.queryData(1)
-          }).catch(err=>console.log(err))
+          if (this.addForm.id==null) {
+            this.$axios.post("http://localhost:8080/api/shopData/add", this.$qs.stringify(this.addForm)).then(res => {
+              this.addFormFlag = false
+              this.queryData(1)
+            }).catch(err => console.log(err))
+          }else{
+            this.$axios.post("http://localhost:8080/api/shopData/update", this.$qs.stringify(this.addForm)).then(res => {
+              this.addFormFlag = false
+              this.queryData(1)
+            }).catch(err => console.log(err))
+          }
         },
         handleCurrentChange:function(page){ //跳转页面
           console.log(page);
@@ -180,7 +195,6 @@
         },changetype:function (row, column) {
           return row.type==0?"下拉框":row.type==1?"单选框":row.type==2?"复选框":"输入框"
         },getTypeDatas(){
-          debugger;
           for (var i = 0; i <this.TypeData.length ; i++) {
             var rs  =this.isParent(this.TypeData[i])
             if (rs==false){
