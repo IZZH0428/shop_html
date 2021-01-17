@@ -8,7 +8,7 @@
             <el-input v-model="searchForm.name" placeholder="名称"></el-input>
           </el-form-item>
           <el-button type="primary" @click="searchbtu">查  询</el-button>
-          <el-button type="success" @click="toadd">新增</el-button>
+
         </el-form>
       </div>
       <el-table
@@ -75,12 +75,18 @@
 
           <el-table-column
             prop="value"
-            label="英文名">
+            label="英文属性值">
           </el-table-column>
 
           <el-table-column
             prop="valueCH"
-            label="名称"
+            label="中文属性值"
+            width="180">
+          </el-table-column>
+
+          <el-table-column
+            prop="attId"
+            label="属性ID"
             width="180">
           </el-table-column>
 
@@ -92,8 +98,8 @@
               <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
             </template>
           </el-table-column>
-
         </el-table>
+        <el-button type="success" @click="toDataValueadd">新增</el-button>
       </el-dialog>
 
 
@@ -118,6 +124,43 @@
         :total="count"
       >
       </el-pagination>
+
+
+
+
+
+      <!--属性值新增修改模板-->
+      <!--新增模板-->
+      <el-dialog title="品牌信息" :visible.sync="addValueFlag">
+
+        <el-form :model="addValueForm" ref="addValueForm"   label-width="100px">
+
+          <el-form-item label="属性值英文名" prop="value">
+            <el-input v-model="addValueForm.value" autocomplete="off" ></el-input>
+          </el-form-item>
+
+          <el-form-item label="属性值中文名" prop="valueCH">
+            <el-input v-model="addValueForm.valueCH" autocomplete="off" ></el-input>
+          </el-form-item>
+
+
+
+
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="addValueFlag = false">取 消</el-button>
+          <el-button type="primary" @click="addDataValue">确 定</el-button>
+        </div>
+      </el-dialog>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -207,7 +250,14 @@
             /*属性值相关*/
             DataValue:[],
             dataValueFlag:false,
-
+            addValueFlag:false,
+            addValueForm:{
+              id:"",
+              value:"",
+              valueCH:"",
+              attId:""
+            },
+            attId:"",
 
 
 
@@ -324,12 +374,24 @@
 
         /*属性值相关*/
         toDataValue:function (attId) {
+          this.addValueForm={}
+          this.attId =attId
           this.dataValueFlag=true;
           this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+attId).then(res=>{
             this.DataValue=res.data.data;
+            console.log(res)
+          }).catch(err=>console.log(err))
+        },
+        toDataValueadd:function () {
+          this.addValueFlag=true
+        },
+        addDataValue:function () {
+          this.addValueForm.attId=this.attId
+          this.$axios.post("http://localhost:8080/api/value/add",this.$qs.stringify(this.addValueForm)).then(res=>{
+            this.toDataValue(this.addValueForm.attId)
+            this.addValueFlag=false
           }).catch(err=>console.log(err))
         }
-
 
 
 
