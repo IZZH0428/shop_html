@@ -154,6 +154,7 @@
               type:"",
               isSKU:"",
             },
+            parentData:{},
             addFormFlag:false,
           }
         },methods:{
@@ -237,6 +238,8 @@
           for (var i = 0; i <this.TypeData.length ; i++) {
             var rs  =this.isParent(this.TypeData[i])
             if (rs==false){
+              this.getParent(this.TypeData[i].pid)
+              this.TypeData[i].name = "分类列表/"+this.parentData.name+"/"+this.TypeData[i].name
               this.TypeDatas.push(this.TypeData[i])
               //console.log(this.TypeDatas)
             }
@@ -248,12 +251,26 @@
             }
           }
           return false
-        },searchbtu:function () {
-          this.$axios.get("http://localhost:8080/api/shopData/getData?limit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
+        },
+        getParent:function(pid){
+          for (var i = 0; i <this.TypeData.length ; i++) {
+            if (this.TypeData[i].id==pid){
+              debugger;
+              this.parentData=this.TypeData[i]
+            }
+          }
+        },
+
+
+
+
+
+        searchbtu:function () {
+          this.$axios.get("http://localhost:8080/api/shopData/getData?limitit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
             this.ShopData=res.data.data;
             this.count=res.data.count;
           }).catch(err=>console.log(err))
-        }
+        },
       },created:function () {
         this.queryData(1)
         this.getTypeData()
