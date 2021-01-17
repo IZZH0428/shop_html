@@ -94,8 +94,8 @@
             prop="id"
             label="操作">
             <template slot-scope="scope">
-             <!-- <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
-              <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
+             <el-button type="primary" icon="el-icon-edit"   @click="toValueUpdate(scope.row)"></el-button>
+              <!-- <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
             </template>
           </el-table-column>
         </el-table>
@@ -374,7 +374,6 @@
 
         /*属性值相关*/
         toDataValue:function (attId) {
-          this.addValueForm={}
           this.attId =attId
           this.dataValueFlag=true;
           this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+attId).then(res=>{
@@ -383,13 +382,27 @@
           }).catch(err=>console.log(err))
         },
         toDataValueadd:function () {
+          this.addValueForm={}
           this.addValueFlag=true
         },
         addDataValue:function () {
           this.addValueForm.attId=this.attId
+          if (this.addValueForm.id==null){
           this.$axios.post("http://localhost:8080/api/value/add",this.$qs.stringify(this.addValueForm)).then(res=>{
             this.toDataValue(this.addValueForm.attId)
             this.addValueFlag=false
+          }).catch(err=>console.log(err))
+          }else{
+            this.$axios.post("http://localhost:8080/api/value/update",this.$qs.stringify(this.addValueForm)).then(res=>{
+              this.toDataValue(this.addValueForm.attId)
+              this.addValueFlag=false
+            }).catch(err=>console.log(err))
+          }
+        },
+        toValueUpdate:function (row) {
+          this.$axios.get("http://localhost:8080/api/value/getDataById?id="+row.id).then(res=>{
+            this.addValueFlag=true;
+            this.addValueForm=res.data.data
           }).catch(err=>console.log(err))
         }
 
