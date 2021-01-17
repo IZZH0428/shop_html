@@ -1,5 +1,16 @@
 <template>
     <div>
+      <div id="searchDiv" align="center">
+
+        <el-form :inline="true" :model="searchForm" class="demo-form-inline">
+
+          <el-form-item label="名称">
+            <el-input v-model="searchForm.name" placeholder="名称"></el-input>
+          </el-form-item>
+          <el-button type="primary" @click="searchbtu">查  询</el-button>
+          <el-button type="success" @click="toadd">新增</el-button>
+        </el-form>
+      </div>
       <el-table
         :data="ShopData"
         style="width: 100%">
@@ -49,7 +60,7 @@
 
       </el-table>
 
-      <el-button type="success" @click="toadd">新增</el-button>
+
       <!--分页-->
       <el-pagination
         align="right"
@@ -126,6 +137,9 @@
         name: "ShopData",
         data(){
           return{
+            searchForm:{
+              name:"",
+            },
             ShopData:[],
             TypeDatas:[],
             TypeData:[],
@@ -144,9 +158,29 @@
           }
         },methods:{
         delBrand:function(id){
-          this.$axios.post("http://localhost:8080/api/shopData/del?id="+id).then(res=>{
-            this.queryData(1)
-          }).catch(err=>console.log(err))
+          this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$axios.post("http://localhost:8080/api/shopData/del?id="+id).then(res=>{
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              this.queryData(1);
+            }).catch(err=>{
+              this.$message({
+                type: 'info',
+                message: '删除失败'
+              });
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
         },
         toupdate:function(row){
           this.$axios.post("http://localhost:8080/api/shopData/queryByid?id="+row.id).then(res=>{
@@ -214,6 +248,11 @@
             }
           }
           return false
+        },searchbtu:function () {
+          this.$axios.get("http://localhost:8080/api/shopData/getData?limit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
+            this.ShopData=res.data.data;
+            this.count=res.data.count;
+          }).catch(err=>console.log(err))
         }
       },created:function () {
         this.queryData(1)

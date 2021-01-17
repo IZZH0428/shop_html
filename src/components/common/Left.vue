@@ -57,13 +57,13 @@
         collapse: false,
         items: [
           {
-            icon: 'el-icon-lx-home',
+            icon: 'el-icon-loading',
             index: 'test',
             title: '系统首页'
           },
 
           {
-            icon: 'el-icon-lx-calendar',
+            icon: 'el-icon-loading',
             index: '3',
             title: '表单相关',
             subs: [
@@ -71,34 +71,18 @@
                 index: 'type',
                 title: '分类管理'
               },{
+                icon: 'el-icon-lx-home',
                 index: 'Brand',
                 title: '品牌管理'
               },{
                 index: 'ShopData',
                 title: '属性管理'
-              },{
-                index: '3-2',
-                title: '三级菜单',
-                subs: [
-                  {
-                    index: 'editor',
-                    title: '富文本编辑器'
-                  },
-                  {
-                    index: 'markdown',
-                    title: 'markdown编辑器'
-                  }
-                ]
-              },
-              {
-                index: 'upload',
-                title: '文件上传'
               }
             ]
           },
 
           {
-            icon: 'el-icon-lx-warn',
+            icon: 'el-icon-loading',
             index: '7',
             title: '错误处理',
             subs: [
