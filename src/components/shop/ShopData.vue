@@ -51,7 +51,8 @@
 
         <el-table-column
           prop="id"
-          label="操作">
+          label="操作"
+          width="300">
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
             <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>
@@ -70,7 +71,7 @@
           <el-table-column
             prop="id"
             label="序号"
-            width="180">
+            width="150">
           </el-table-column>
 
           <el-table-column
@@ -81,18 +82,19 @@
           <el-table-column
             prop="valueCH"
             label="中文属性值"
-            width="180">
+            width="150">
           </el-table-column>
 
           <el-table-column
             prop="attId"
             label="属性ID"
-            width="180">
+            width="150">
           </el-table-column>
 
           <el-table-column
             prop="id"
-            label="操作">
+            label="操作"
+            width="150">
             <template slot-scope="scope">
               <el-button type="primary" icon="el-icon-edit"   @click="toValueUpdate(scope.row)"></el-button>
               <el-button type="danger" icon="el-icon-delete"  @click="delValue(scope.row.id)"></el-button>
