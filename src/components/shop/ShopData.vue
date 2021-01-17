@@ -94,8 +94,8 @@
             prop="id"
             label="操作">
             <template slot-scope="scope">
-             <el-button type="primary" icon="el-icon-edit"   @click="toValueUpdate(scope.row)"></el-button>
-              <!-- <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
+              <el-button type="primary" icon="el-icon-edit"   @click="toValueUpdate(scope.row)"></el-button>
+              <el-button type="danger" icon="el-icon-delete"  @click="delValue(scope.row.id)"></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -372,6 +372,11 @@
           }).catch(err=>console.log(err))
         },
 
+
+
+
+
+
         /*属性值相关*/
         toDataValue:function (attId) {
           this.attId =attId
@@ -404,7 +409,33 @@
             this.addValueFlag=true;
             this.addValueForm=res.data.data
           }).catch(err=>console.log(err))
-        }
+        },
+        delValue:function(id){
+          this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$axios.post("http://localhost:8080/api/value/del?id="+id).then(res=>{
+              this.toDataValue(this.attId)
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              this.queryData(1);
+            }).catch(err=>{
+              this.$message({
+                type: 'info',
+                message: '删除失败'
+              });
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
+        },
 
 
 
