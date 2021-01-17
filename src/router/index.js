@@ -24,7 +24,7 @@ export default new Router({
           path: '/Brand',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Brand.vue'),
           meta: { title: '品牌管理' }
-        },,{
+        },{
           path: '/ShopData',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/ShopData.vue'),
           meta: { title: '属性管理' }

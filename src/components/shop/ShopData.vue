@@ -55,10 +55,56 @@
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
             <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>
+            <el-button type="success" @click="toDataValue(scope.row.id)">属性值维护</el-button>
           </template>
         </el-table-column>
 
       </el-table>
+      <!--属性值弹框-->
+
+      <el-dialog title="属性值信息" :visible.sync="dataValueFlag">
+        <el-table
+          :data="DataValue"
+          style="width: 100%">
+
+          <el-table-column
+            prop="id"
+            label="序号"
+            width="180">
+          </el-table-column>
+
+          <el-table-column
+            prop="value"
+            label="英文名">
+          </el-table-column>
+
+          <el-table-column
+            prop="valueCH"
+            label="名称"
+            width="180">
+          </el-table-column>
+
+          <el-table-column
+            prop="id"
+            label="操作">
+            <template slot-scope="scope">
+             <!-- <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
+              <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>-->
+            </template>
+          </el-table-column>
+
+        </el-table>
+      </el-dialog>
+
+
+
+
+
+
+
+
+
+
 
 
       <!--分页-->
@@ -156,6 +202,16 @@
             },
             parentData:{},
             addFormFlag:false,
+
+
+            /*属性值相关*/
+            DataValue:[],
+            dataValueFlag:false,
+
+
+
+
+
           }
         },methods:{
         delBrand:function(id){
@@ -255,22 +311,39 @@
         getParent:function(pid){
           for (var i = 0; i <this.TypeData.length ; i++) {
             if (this.TypeData[i].id==pid){
-              debugger;
               this.parentData=this.TypeData[i]
             }
           }
         },
-
-
-
-
-
         searchbtu:function () {
           this.$axios.get("http://localhost:8080/api/shopData/getData?limitit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
             this.ShopData=res.data.data;
             this.count=res.data.count;
           }).catch(err=>console.log(err))
         },
+
+        /*属性值相关*/
+        toDataValue:function (attId) {
+          this.dataValueFlag=true;
+          this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+attId).then(res=>{
+            this.DataValue=res.data.data;
+          }).catch(err=>console.log(err))
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       },created:function () {
         this.queryData(1)
         this.getTypeData()
