@@ -19,22 +19,24 @@
         <el-table-column
           prop="id"
           label="序号"
-          width="180">
+          width="150">
         </el-table-column>
 
         <el-table-column
           prop="name"
+          width="150"
           label="英文名">
         </el-table-column>
 
         <el-table-column
           prop="nameCH"
           label="名称"
-          width="180">
+          width="150">
         </el-table-column>
 
         <el-table-column
           prop="typeId"
+          width="150"
           label="商品类型"
           :formatter="changetypeId"
         >
@@ -45,6 +47,13 @@
           prop="type"
           label="属性类型"
           :formatter="changetype">
+        </el-table-column>
+
+        <el-table-column
+          prop="isSKU"
+          label="是否为SKU"
+          :formatter="changeSKU"
+         >
         </el-table-column>
 
 
@@ -260,10 +269,8 @@
               type:"",
               isSKU:"",
             },
-            parentData:{},
             addFormFlag:false,
             typeName:"",
-
             /*属性值相关*/
             DataValue:[],
             dataValueFlag:false,
@@ -344,16 +351,12 @@
         },handleSizeChange:function(size){ //跳转页面
           this.size=size;
           this.queryData(1);
-        },
-
-
-
-
-
-        changetypeId:function (row, column) {
+        },changeSKU:function(row, column){
+          return row.isSKU==0?"是":"否"
+        },changetypeId:function (row, column) {
           for (let i = 0; i <this.TypeData.length ; i++) {
             if (row.typeId==this.TypeData[i].id){
-              return this.TypeData[i].name
+              return this.TypeData[i].name.substr(this.TypeData[i].name.lastIndexOf("/")+1)
             }
           }
           return "未知"
@@ -380,7 +383,6 @@
           this.$axios.get("http://localhost:8080/api/type/getData").then(res=>{
             //console.log(res)
             this.TypeData=res.data.data;
-            debugger;
             this.getTypeDatas();
             for (let i = 0; i <this.TypeDatas.length ; i++) {
               this.typeName="",
