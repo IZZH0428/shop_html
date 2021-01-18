@@ -57,14 +57,14 @@
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
             <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>
-            <el-button v-if="scope.row.type!=3" type="success"  @click="toDataValue(scope.row.id)">属性值维护</el-button>
+            <el-button v-if="scope.row.type!=3" type="success"  @click="toDataValue(scope.row)">属性值维护</el-button>
           </template>
         </el-table-column>
 
       </el-table>
       <!--属性值弹框-->
 
-      <el-dialog title="属性值信息" :visible.sync="dataValueFlag">
+      <el-dialog :title=ValueTitle :visible.sync="dataValueFlag">
         <el-button type="success" @click="toDataValueadd">新增</el-button>
         <el-table
           v-if="!addValueFlag"
@@ -109,7 +109,7 @@
         <!--属性值新增修改模板-->
 
 
-          <el-form :model="addValueForm" ref="addValueForm"   label-width="100px" v-if="addValueFlag">
+          <el-form :model="addValueForm" :rules="valuerules" ref="addValueForm"   label-width="200px" v-if="addValueFlag">
 
             <el-form-item label="属性值英文名" prop="value">
               <el-input v-model="addValueForm.value" autocomplete="off" ></el-input>
@@ -124,10 +124,7 @@
               <el-button type="primary" @click="addDataValue">确 定</el-button>
             </el-form-item>
 
-
           </el-form>
-
-
 
       </el-dialog>
 
@@ -232,6 +229,19 @@
     export default {
         name: "ShopData",
         data(){
+          /*验证*/
+          var checkname = (rule, value, callback) => {
+            if (!value) {
+              return callback(new Error('属性名不能为空'));
+            }
+            if(/^[\u4e00-\u9fa5]+$/i.test(value)){
+              callback();
+            }else{
+              callback(new Error('只能输入中文'));
+            }
+          };
+
+
           return{
             searchForm:{
               name:"",
@@ -265,8 +275,16 @@
               attId:""
             },
             attId:"",
-
-
+            ValueTitle:"",
+            valuerules:{
+              valueCH: [
+                { required: true, message: '请输入属性值的名称', trigger: 'blur' },
+                { max: 10, message: '长度不能超过 10 个字符', trigger: 'blur' },
+                { validator:checkname,trigger: 'blur' }
+              ],
+              value: [
+                { required: true, message: '请输入属性值', trigger: 'change' }
+              ]},
 
 
           }
@@ -385,13 +403,16 @@
 
 
         /*属性值相关*/
-        toDataValue:function (attId) {
-          this.attId =attId
+        toDataValue:function (row) {
+          this.attId =row.id
           this.dataValueFlag=true;
           this.addValueFlag=false;
+          this.getDataValue(row.id)
+          this.ValueTitle=row.nameCH+"的选项信息"
+        },
+        getDataValue:function(attId){
           this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+attId).then(res=>{
             this.DataValue=res.data.data;
-            console.log(res)
           }).catch(err=>console.log(err))
         },
         toDataValueadd:function () {
@@ -400,17 +421,24 @@
         },
         addDataValue:function () {
           this.addValueForm.attId=this.attId
+
+          this.$refs["addValueForm"].validate((valid) => {
+            if (valid) {
           if (this.addValueForm.id==null){
           this.$axios.post("http://localhost:8080/api/value/add",this.$qs.stringify(this.addValueForm)).then(res=>{
-            this.toDataValue(this.addValueForm.attId)
+            this.getDataValue(this.addValueForm.attId)
             this.addValueFlag=false
           }).catch(err=>console.log(err))
           }else{
             this.$axios.post("http://localhost:8080/api/value/update",this.$qs.stringify(this.addValueForm)).then(res=>{
-              this.toDataValue(this.addValueForm.attId)
+              this.getDataValue(this.addValueForm.attId)
               this.addValueFlag=false
             }).catch(err=>console.log(err))
-          }
+          }} else {
+                return false;
+              }
+            });
+
         },
         toValueUpdate:function (row) {
           this.$axios.get("http://localhost:8080/api/value/getDataById?id="+row.id).then(res=>{
@@ -425,7 +453,7 @@
             type: 'warning'
           }).then(() => {
             this.$axios.post("http://localhost:8080/api/value/del?id="+id).then(res=>{
-              this.toDataValue(this.attId)
+              this.getDataValue(this.attId)
               this.$message({
                 type: 'success',
                 message: '删除成功!'
