@@ -262,7 +262,7 @@
             },
             parentData:{},
             addFormFlag:false,
-
+            typeName:"",
 
             /*属性值相关*/
             DataValue:[],
@@ -345,51 +345,92 @@
           this.size=size;
           this.queryData(1);
         },
-        queryData:function (page) {
-          this.$axios.get("http://localhost:8080/api/shopData/getData?limit="+this.size+"&page="+page).then(res=>{
-            this.ShopData=res.data.data;
-            this.count=res.data.count;
-          }).catch(err=>console.log(err))
-        },changetypeId:function (row, column) {
+
+
+
+
+
+        changetypeId:function (row, column) {
           for (let i = 0; i <this.TypeData.length ; i++) {
             if (row.typeId==this.TypeData[i].id){
               return this.TypeData[i].name
             }
           }
-         return "未知"
-        },getTypeData:function () {
+          return "未知"
+        },
+
+
+        queryData:function (page) {
+          this.$axios.get("http://localhost:8080/api/shopData/getData?limit="+this.size+"&page="+page).then(res=>{
+            this.ShopData=res.data.data;
+            this.count=res.data.count;
+          }).catch(err=>console.log(err))
+        },
+
+
+
+
+
+
+
+
+
+
+        getTypeData:function () {
           this.$axios.get("http://localhost:8080/api/type/getData").then(res=>{
             //console.log(res)
             this.TypeData=res.data.data;
-            this.getTypeDatas()
+            debugger;
+            this.getTypeDatas();
+            for (let i = 0; i <this.TypeDatas.length ; i++) {
+              this.typeName="",
+                this.chandleName(this.TypeDatas[i]);
+                this.TypeDatas[i].name=this.typeName.split("/").reverse().join("/").substr(0,this.typeName.length-1);
+            }
           }).catch(err=>console.log(err))
         },changetype:function (row, column) {
           return row.type==0?"下拉框":row.type==1?"单选框":row.type==2?"复选框":"输入框"
-        },getTypeDatas(){
-          for (var i = 0; i <this.TypeData.length ; i++) {
-            var rs  =this.isParent(this.TypeData[i])
-            if (rs==false){
-              this.getParent(this.TypeData[i].pid)
-              this.TypeData[i].name = "分类列表/"+this.parentData.name+"/"+this.TypeData[i].name
-              this.TypeDatas.push(this.TypeData[i])
-              //console.log(this.TypeDatas)
+        },getTypeDatas:function(){
+            for (let i = 0; i <this.TypeData.length ; i++) {
+              let  node=this.TypeData[i];
+              this.isChildrenNode(node);
+            }
+        },isChildrenNode:function (node) {
+          let rs=true; //标示
+          for (let i = 0; i <this.TypeData.length ; i++) {
+            if(node.id==this.TypeData[i].pid){
+              rs=false;
+              break;
             }
           }
-        },isParent:function (datas) {
-          for (var j = 0; j <this.TypeData.length ; j++) {
-            if (datas.id==this.TypeData[j].pid){
-             return true
-            }
-          }
-          return false
-        },
-        getParent:function(pid){
-          for (var i = 0; i <this.TypeData.length ; i++) {
-            if (this.TypeData[i].id==pid){
-              this.parentData=this.TypeData[i]
-            }
+          if(rs==true){
+            this.TypeDatas.push(node);
           }
         },
+        chandleName:function(node){
+          if(node.pid!=0){ //临界值
+            this.typeName+="/"+node.name;
+            //上级节点
+            for (let i = 0; i <this.TypeData.length ; i++) {
+              if(node.pid==this.TypeData[i].id){
+                this.chandleName(this.TypeData[i]);
+                break;
+              }
+            }
+          }else{
+            this.typeName+="/"+node.name;
+          }
+        },
+
+
+
+
+
+
+
+
+
+
         searchbtu:function () {
           this.$axios.get("http://localhost:8080/api/shopData/getData?limitit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
             this.ShopData=res.data.data;
@@ -489,7 +530,6 @@
       },created:function () {
         this.queryData(1)
         this.getTypeData()
-
 
       }
     }
