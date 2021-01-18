@@ -57,14 +57,14 @@
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit"   @click="toupdate(scope.row)"></el-button>
             <el-button type="danger" icon="el-icon-delete"  @click="delBrand(scope.row.id)"></el-button>
-            <el-button v-if="scope.row.type!=3" type="success"  @click="toDataValue(scope.row)">属性值维护</el-button>
+            <el-button v-if="scope.row.type!=3" type="success"  @click="toDataValue(scope.row.id)">属性值维护</el-button>
           </template>
         </el-table-column>
 
       </el-table>
       <!--属性值弹框-->
 
-      <el-dialog :title="nameCH" :visible.sync="dataValueFlag">
+      <el-dialog title="属性值信息" :visible.sync="dataValueFlag">
         <el-button type="success" @click="toDataValueadd">新增</el-button>
         <el-table
           v-if="!addValueFlag"
@@ -174,7 +174,7 @@
 
 
       <!--新增模板-->
-      <el-dialog title="属性信息" :visible.sync="addFormFlag">
+      <el-dialog title="品牌信息" :visible.sync="addFormFlag">
 
         <el-form :model="addForm" ref="addForm"   label-width="100px">
 
@@ -265,7 +265,7 @@
               attId:""
             },
             attId:"",
-            nameCH:"",
+
 
 
 
@@ -385,12 +385,11 @@
 
 
         /*属性值相关*/
-        toDataValue:function (row) {
-          this.attId =row.id
-          this.nameCH =row.nameCH+"的选项信息"
+        toDataValue:function (attId) {
+          this.attId =attId
           this.dataValueFlag=true;
           this.addValueFlag=false;
-          this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+row.id).then(res=>{
+          this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+attId).then(res=>{
             this.DataValue=res.data.data;
             console.log(res)
           }).catch(err=>console.log(err))
