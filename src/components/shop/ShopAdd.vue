@@ -64,7 +64,7 @@
 
           <!-- 类型-->
         <el-form-item label="商品类型" prop="typeId">
-          <el-select v-model="addForm.typeId" placeholder="请选择" @change="getShopDataByTypeId(addForm.typeId)">
+              <el-select v-model="addForm.typeId" placeholder="请选择" @change="getShopDataByTypeId(addForm.typeId)">
             <el-option
               v-for="item in TypeDatas"
               :key="item.id"
@@ -84,21 +84,9 @@
 
                <!--  0 下拉框     1 单选框      2  复选框   3  输入框  -->
 
-               <el-select v-show="a.type==0"  placeholder="请选择"  v-model="cc">
-                 <el-option v-for="b in a.values" :key="b.id"  :label="b.valueCH" :value="b.id"></el-option>
-               </el-select>
-
-               <el-radio-group v-show="a.type==1" v-model="aa">
-                 <el-radio-button v-for="b in a.values" :key="b.id" :label="b.valueCH"></el-radio-button>
-               </el-radio-group>
-
-
-               <el-checkbox-group v-show="a.type==2" v-model="bb">
-                 <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.valueCH"  ></el-checkbox-button>
+               <el-checkbox-group v-show="a.type==2" v-model="a.ckValues">
+                 <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.valueCH" @change="skuChange" ></el-checkbox-button>
                </el-checkbox-group>
-
-
-               <el-input v-show="a.type==3"></el-input>
 
              </el-form-item>
 
@@ -106,8 +94,23 @@
 
 
          </div>
-
-
+      <div align="center">
+          <!--表格-->
+          <table v-if="tableShow" border="1" >
+            <!--表头-->
+              <tr >
+                <th v-for="c in SkuData">{{c.nameCH}}</th>
+                <th>价格</th>
+                <th>库存</th>
+              </tr>
+            <!--表数据-->
+              <tr  v-for="a in dika">
+                <td v-for="b in a">{{b}}</td>
+                <td><input/></td>
+                <td><input/></td>
+              </tr>
+          </table>
+      </div>
           <h1>------------------------------------------------------</h1>
           <!--不是SKU属性-->
           <div>
@@ -173,9 +176,11 @@
           ShopData:[],
           SkuData:[],
           noSkuData:[],
+          tableShow:false,
           aa:[],
           bb:[],
           cc:[],
+          dika:[],
           BrandData:{
             id:"",
             name:""
@@ -255,25 +260,27 @@
           this.SkuData=[];
           this.noSkuData=[];
           this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
-            this.ShopData=res.data.data;
-            for (let i = 0; i <this.ShopData.length ; i++) {
-              if (this.ShopData[i].isSKU==0 ){
-                if(this.ShopData[i].type!=3){
+            let ShopData=res.data.data;
+            for (let i = 0; i <ShopData.length ; i++) {
+              if (ShopData[i].isSKU==0 ){
+                if(ShopData[i].type!=3){
                   //发起请求 查询此属性对应的选项值
-                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+this.ShopData[i].id).then(res=>{
-                    this.ShopData[i].values=res.data.data
-                    this.SkuData.push(this.ShopData[i])
+                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
+                    ShopData[i].values=res.data.data
+                    ShopData[i].ckValues=[]
+                    this.SkuData.push(ShopData[i])
                   }).catch(err=>console.log(err))}else {
-                  this.SkuData.push(this.ShopData[i])
+                  ShopData[i].ckValues=[]
+                  this.SkuData.push(ShopData[i])
                 }
                 }else {
-                if(this.ShopData[i].type!=3){
+                if(ShopData[i].type!=3){
                   //发起请求 查询此属性对应的选项值
-                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+this.ShopData[i].id).then(res=>{
-                    this.ShopData[i].values=res.data.data
-                    this.noSkuData.push(this.ShopData[i])
+                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
+                    ShopData[i].values=res.data.data
+                    this.noSkuData.push(ShopData[i])
                   }).catch(err=>console.log(err))}else{
-                  this.noSkuData.push(this.ShopData[i])
+                  this.noSkuData.push(ShopData[i])
                 }
 
               }
@@ -283,15 +290,60 @@
         },
 
 
-        /*属性值*/
-        /*getDataValue:function(attId){
-          this.DataValue=[];
-          this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+attId).then(res=>{
-            this.SkuData[i].values=res.data.data
-            console.log(this.DataValue)
-          }).catch(err=>console.log(err))
-        },*/
+        skuChange:function () {
+          //console.log(this.SkuData);
+          //判断是否要生成笛卡尔积
+          var a=[]
+          let flag=true;
+          for (let i = 0; i <this.SkuData.length ; i++) {
+            if(this.SkuData[i].ckValues.length==0 ){
+              flag=false;
+              break;
+            }
+          }
+          if(flag==true){
+            for (let i = 0; i <this.SkuData.length ; i++) {
+              a.push(this.SkuData[i].ckValues)
+            }
+            this.dika = this.discarts(a)
 
+          }
+          this.tableShow=flag;
+        },
+        //笛卡尔积
+        discarts:function() {
+        var twodDscartes = function (a, b) {
+          var ret = [];
+          for (var i = 0; i < a.length; i++) {
+            for (var j = 0; j < b.length; j++) {
+              ret.push(ft(a[i], b[j]));
+            }
+          }
+          return ret;
+        }
+        var ft = function (a, b) {
+          if (!(a instanceof Array))
+            a = [a];
+          var ret = a.slice(0);
+          ret.push(b);
+          return ret;
+        }
+        //多个一起做笛卡尔积
+        return (function (data) {
+          var len = data.length;
+          if (len == 0)
+            return [];
+          else if (len == 1)
+            return data[0];
+          else {
+            var r = data[0];
+            for (var i = 1; i < len; i++) {
+              r = twodDscartes(r, data[i]);
+            }
+            return r;
+          }
+        })(arguments.length > 1 ? arguments : arguments[0]);
+    },
 
 
       },created:function () {
