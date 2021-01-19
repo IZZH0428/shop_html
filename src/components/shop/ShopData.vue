@@ -8,7 +8,7 @@
             <el-input v-model="searchForm.name" placeholder="名称"></el-input>
           </el-form-item>
           <el-button type="primary" @click="searchbtu">查  询</el-button>
-
+          <el-button type="success" @click="toadd">新增</el-button>
         </el-form>
       </div>
       <el-table
@@ -180,7 +180,7 @@
 
 
       <!--新增模板-->
-      <el-dialog title="品牌信息" :visible.sync="addFormFlag">
+      <el-dialog title="属性信息" :visible.sync="addFormFlag">
 
         <el-form :model="addForm" ref="addForm"   label-width="100px">
 

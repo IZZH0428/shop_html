@@ -77,6 +77,9 @@
               },{
                 index: 'ShopData',
                 title: '属性管理'
+              },{
+                index: 'ShopAdd',
+                title: '添加商品'
               }
             ]
           },

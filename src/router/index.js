@@ -29,6 +29,10 @@ export default new Router({
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/ShopData.vue'),
           meta: { title: '属性管理' }
         },{
+          path: '/ShopAdd',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/ShopAdd.vue'),
+          meta: { title: '属性管理' }
+        },{
           path: '/Type',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Type.vue'),
           meta: { title: '分类管理' }
