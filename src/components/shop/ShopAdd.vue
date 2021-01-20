@@ -94,23 +94,31 @@
 
 
          </div>
-      <div align="center">
-          <!--表格-->
-          <table v-if="tableShow" border="1" >
-            <!--表头-->
-              <tr >
-                <th v-for="c in SkuData">{{c.nameCH}}</th>
-                <th>价格</th>
-                <th>库存</th>
-              </tr>
-            <!--表数据-->
-              <tr  v-for="a in dika">
-                <td v-for="b in a">{{b}}</td>
-                <td><input/></td>
-                <td><input/></td>
-              </tr>
-          </table>
-      </div>
+          <el-table
+            v-if="tableShow"
+            :data="tableData"
+            style="width: 100%">
+
+            <el-table-column v-for="c in cols" :key="c.id" :label="c.nameCH" :prop="c.name">
+            </el-table-column>
+
+            <el-table-column
+              label="库存"
+              width="180">
+
+              <template slot-scope="scope">
+                <el-input/>
+              </template>
+
+            </el-table-column>
+            <el-table-column
+              label="价格"
+              width="180">
+              <template slot-scope="scope">
+                <el-input/>
+              </template>
+            </el-table-column>
+          </el-table>
           <h1>------------------------------------------------------</h1>
           <!--不是SKU属性-->
           <div>
@@ -176,6 +184,8 @@
           ShopData:[],
           SkuData:[],
           noSkuData:[],
+          tableData:[],
+          cols:[],
           tableShow:false,
           aa:[],
           bb:[],
@@ -257,6 +267,7 @@
 
         /*通过分类查到属性*/
         getShopDataByTypeId:function (typeId) {
+          this.tableShow=false;
           this.SkuData=[];
           this.noSkuData=[];
           this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
@@ -294,6 +305,8 @@
           //console.log(this.SkuData);
           //判断是否要生成笛卡尔积
           var a=[]
+          this.cols=[];
+          this.tableData=[];
           let flag=true;
           for (let i = 0; i <this.SkuData.length ; i++) {
             if(this.SkuData[i].ckValues.length==0 ){
@@ -301,15 +314,33 @@
               break;
             }
           }
-          if(flag==true){
-            for (let i = 0; i <this.SkuData.length ; i++) {
+          if(flag==true) {
+            for (let i = 0; i < this.SkuData.length; i++) {
+              this.cols.push({"id":this.SkuData[i].id,"nameCH":this.SkuData[i].nameCH,"name":this.SkuData[i].name});
               a.push(this.SkuData[i].ckValues)
             }
             this.dika = this.discarts(a)
 
+            for (let i = 0; i <  this.dika.length; i++) {
+              let tableValue = {};
+              for (let j = 0; j <  this.dika[i].length; j++) {
+                let key = this.cols[j].name;
+                tableValue[key] = this.dika[i][j];
+              }
+              this.tableData.push(tableValue);
+            }
           }
           this.tableShow=flag;
         },
+
+
+
+
+
+
+
+
+
         //笛卡尔积
         discarts:function() {
         var twodDscartes = function (a, b) {
