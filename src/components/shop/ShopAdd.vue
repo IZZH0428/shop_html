@@ -7,7 +7,7 @@
         <el-step title="步骤 3"></el-step>
       </el-steps>
       <div  style="width: 650px; margin-left: 100px" >
-      <el-form :model="addForm"  ref="addForm"   label-width="200px" v-if="active==0?true:false">
+      <el-form :model="addForm"  ref="addForm"   label-width="200px" v-if="active==0">
 
 
 
@@ -54,12 +54,26 @@
           <el-input-number v-model="addForm.sortNum"  :step="1" :min="0" :max="100"></el-input-number>
         </el-form-item>
 
+        <el-form-item label="图片" prop="imgpath">
+          <div> <img :src="addForm.imgPath" width="80"></div>
+          <el-upload
+            class="upload-demo"
+            action="http://localhost:8080/api/brand/upload"
+            :on-success="imgCallBack"
+            name="img"
+            list-type="picture">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
+
       </el-form>
+      </div>
 
 
 
         <!--步骤2-->
-        <div v-if="active==1?true:false">
+        <div v-if="active==1">
         <el-form :model="addForm"  ref="addForm"   label-width="200px" >
 
           <!-- 类型-->
@@ -97,7 +111,8 @@
           <el-table
             v-if="tableShow"
             :data="tableData"
-            style="width: 100%">
+            style="width: 1000px; margin-left:150px ">
+
 
             <el-table-column v-for="c in cols" :key="c.id" :label="c.nameCH" :prop="c.name">
             </el-table-column>
@@ -119,7 +134,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <h1>------------------------------------------------------</h1>
+
           <!--不是SKU属性-->
           <div>
 
@@ -156,7 +171,6 @@
         </el-form>
 
 
-        </div>
       </div>
       <div align="center">
       <el-button style="margin-top: 12px;" @click="before">上一步</el-button>
@@ -175,8 +189,10 @@
             id:"",// 主键
             name:"",// 名称
             title:"",//  标题
+            typeId:"",
             bandId:"",//  品牌id
             productdecs:"",//  商品介绍
+            imgPath:"",//  图片路径
             price:0,//   价格
             stocks:0,//  库存
             sortNum:0,//  排许
@@ -209,8 +225,12 @@
           if (this.active-- < 2) this.active = 0;
         },
 
-
-
+      /*图片上传*/
+        imgCallBack:function(response, file, fileList){ //图片上传的回调函数
+          // 赋值
+          console.log(response)
+          this.addForm.imgpath=response.data;
+        },
 
 
 
