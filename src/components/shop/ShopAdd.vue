@@ -411,7 +411,7 @@
 
           //非SKU
           for (let i = 0; i <this.noSkuData.length; i++) {
-            let arr=this.noSkuData[i].id
+            let arr=this.noSkuData[i].name
             console.log(arr)
             let arr1=this.noSkuData[i].ckValues1;
             let ass='{'+'"'+arr+'"'+':'+'"'+arr1+'"'+'}'

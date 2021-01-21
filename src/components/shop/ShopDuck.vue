@@ -576,7 +576,7 @@
 
           //非SKU
           for (let i = 0; i <this.noSkuData.length; i++) {
-            let arr=this.noSkuData[i].id
+            let arr=this.noSkuData[i].name
             console.log(arr)
             let arr1=this.noSkuData[i].ckValues1;
             let ass='{'+'"'+arr+'"'+':'+'"'+arr1+'"'+'}'
@@ -602,6 +602,7 @@
           console.log(this.updateForm)
           this.$axios.post("http://192.168.1.32:8080/api/duck/updateData",add1).then(res=>{
             this.$message.success("修改成功");
+            this.updateDataFlag=false;
           }).catch(err=>console.log(err));
         },
       },created:function () {
