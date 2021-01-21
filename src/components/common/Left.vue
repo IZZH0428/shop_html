@@ -80,6 +80,9 @@
               },{
                 index: 'ShopAdd',
                 title: '添加商品'
+              },{
+                index: 'ShopDuck',
+                title: '商品展示'
               }
             ]
           },

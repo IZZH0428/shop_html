@@ -434,7 +434,7 @@
 
 
         searchbtu:function () {
-          this.$axios.get("http://localhost:8080/api/shopData/getData?limitit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
+          this.$axios.get("http://localhost:8080/api/shopData/getData?limit="+this.size+"&page=1&name="+this.searchForm.name).then(res=>{
             this.ShopData=res.data.data;
             this.count=res.data.count;
           }).catch(err=>console.log(err))

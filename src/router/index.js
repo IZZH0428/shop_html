@@ -31,11 +31,15 @@ export default new Router({
         },{
           path: '/ShopAdd',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/ShopAdd.vue'),
-          meta: { title: '属性管理' }
+          meta: { title: '商品新增' }
         },{
           path: '/Type',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/Type.vue'),
           meta: { title: '分类管理' }
+        },{
+          path: '/ShopDuck',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/ShopDuck.vue'),
+          meta: { title: '商品展示' }
         }
 
       ]

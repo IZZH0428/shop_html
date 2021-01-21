@@ -368,11 +368,6 @@
 
 
 
-
-
-
-
-
         //笛卡尔积
         discarts:function() {
         var twodDscartes = function (a, b) {
