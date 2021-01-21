@@ -54,7 +54,7 @@
           <el-input-number v-model="addForm.sortNum"  :step="1" :min="0" :max="100"></el-input-number>
         </el-form-item>
 
-        <el-form-item label="图片" prop="imgpath">
+        <el-form-item label="图片" prop="imgPath">
           <div> <img :src="addForm.imgPath" width="80"></div>
           <el-upload
             class="upload-demo"
@@ -114,7 +114,7 @@
             style="width: 1000px; margin-left:150px ">
 
 
-            <el-table-column v-for="c in cols" :key="c.id" :label="c.nameCH" :prop="c.name">
+            <el-table-column v-for="c in cols" :key="c.id" :label="c.nameCH" :prop="c.name" >
             </el-table-column>
 
             <el-table-column
@@ -122,15 +122,16 @@
               width="180">
 
               <template slot-scope="scope">
-                <el-input/>
+                <el-input-number v-model="scope.row.kucun"  :step="1" :min="0" :max="100"></el-input-number>
               </template>
 
             </el-table-column>
             <el-table-column
               label="价格"
-              width="180">
+              width="180" >
               <template slot-scope="scope">
-                <el-input/>
+                <el-input-number v-model="scope.row.price"  :step="1" :min="0" :max="100"></el-input-number>
+
               </template>
             </el-table-column>
           </el-table>
@@ -138,28 +139,32 @@
           <!--不是SKU属性-->
           <div>
 
-            <el-form-item v-if="noSkuData.length>0" label="商品参数  :" prop="name">
+            <el-form-item v-if="noSkuData.length>0" label="商品参数  :" prop="prop
+            name">
 
               <br>
               <el-form-item v-for="a in  noSkuData" :key="a.id" :label="a.nameCH" style="margin-left: -150px">
 
                 <!--  0 下拉框     1 单选框      2  复选框   3  输入框  -->
 
-                <el-select v-show="a.type==0"  placeholder="请选择"  v-model="cc">
+                <el-select v-show="a.type==0"  placeholder="请选择"  v-model="a.ckValues1">
                   <el-option v-for="b in a.values" :key="b.id"  :label="b.valueCH" :value="b.id"></el-option>
                 </el-select>
 
-                <el-radio-group v-show="a.type==1" v-model="aa">
-                  <el-radio-button v-for="b in a.values" :key="b.id" :label="b.valueCH"></el-radio-button>
+                <el-radio-group v-show="a.type==1" v-model="a.ckValues1">
+                  <el-radio-button v-for="b in a.values" :key="b.id" :label="b.id" :value="b.id">{{b.valueCH}}</el-radio-button>
                 </el-radio-group>
 
 
-                <el-checkbox-group v-show="a.type==2" v-model="bb">
-                  <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.valueCH"  ></el-checkbox-button>
+
+
+                <el-checkbox-group v-show="a.type==2" v-model="a.ckValues1">
+                  <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.valueCH" :value="b.id" ></el-checkbox-button>
                 </el-checkbox-group>
 
+                  <el-input v-show="a.type==3" v-model="a.ckValues1"></el-input>
 
-                <el-input v-show="a.type==3"></el-input>
+
 
               </el-form-item>
 
@@ -170,7 +175,7 @@
 
         </el-form>
 
-
+          <el-button  @click="ShopAdd">提交</el-button>
       </div>
       <div align="center">
       <el-button style="margin-top: 12px;" @click="before">上一步</el-button>
@@ -197,7 +202,7 @@
             stocks:0,//  库存
             sortNum:0,//  排许
           },
-          ShopData:[],
+          ShopData1:[],
           SkuData:[],
           noSkuData:[],
           tableData:[],
@@ -229,7 +234,7 @@
         imgCallBack:function(response, file, fileList){ //图片上传的回调函数
           // 赋值
           console.log(response)
-          this.addForm.imgpath=response.data;
+          this.addForm.imgPath=response.data;
         },
 
 
@@ -291,13 +296,14 @@
           this.SkuData=[];
           this.noSkuData=[];
           this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
-            let ShopData=res.data.data;
+            var ShopData=res.data.data;
             for (let i = 0; i <ShopData.length ; i++) {
               if (ShopData[i].isSKU==0 ){
                 if(ShopData[i].type!=3){
                   //发起请求 查询此属性对应的选项值
                   this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
                     ShopData[i].values=res.data.data
+                    //console.log(ShopData[i].values)
                     ShopData[i].ckValues=[]
                     this.SkuData.push(ShopData[i])
                   }).catch(err=>console.log(err))}else {
@@ -309,15 +315,20 @@
                   //发起请求 查询此属性对应的选项值
                   this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
                     ShopData[i].values=res.data.data
+                    ShopData[i].ckValues1="";
                     this.noSkuData.push(ShopData[i])
-                  }).catch(err=>console.log(err))}else{
+                  }).catch(err=>console.log(err))
+                }else{
+                  ShopData[i].ckValues1="";
                   this.noSkuData.push(ShopData[i])
                 }
 
               }
             }
           }).catch(err=>console.log(err))
-
+          this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
+            this.ShopData1=res.data.data
+          }).catch(err=>console.log(err))
         },
 
 
@@ -335,6 +346,7 @@
             }
           }
           if(flag==true) {
+            //console.log(this.SkuData)
             for (let i = 0; i < this.SkuData.length; i++) {
               this.cols.push({"id":this.SkuData[i].id,"nameCH":this.SkuData[i].nameCH,"name":this.SkuData[i].name});
               a.push(this.SkuData[i].ckValues)
@@ -395,7 +407,81 @@
           }
         })(arguments.length > 1 ? arguments : arguments[0]);
     },
+        ShopAdd:function () {
 
+          //this.shopAddForm.typeId=this.addForm.typeId
+          //商品的新增
+          let sku=[];
+          let nosku=[];
+
+
+
+          //非SKU
+          for (let i = 0; i <this.noSkuData.length; i++) {
+            let arr=this.noSkuData[i].id
+            console.log(arr)
+            let arr1=this.noSkuData[i].ckValues1;
+            let ass='{'+'"'+arr+'"'+':'+'"'+arr1+'"'+'}'
+            let saveAddvalues={proId:this.addForm.typeId,attrData:ass}
+            sku.push(saveAddvalues);
+          }
+          //SKU
+          for (let i = 0; i <this.tableData.length; i++) {
+            let saveAddvalues = {
+              proId: this.addForm.typeId,
+              price: this.tableData[i].price,
+              storcks: this.tableData[i].kucun
+            }
+            delete this.tableData[i].price
+            delete this.tableData[i].kucun
+            saveAddvalues.attrData = JSON.stringify(this.tableData[i]);
+             sku.push(saveAddvalues)
+            //console.log(JSON.stringify(this.tableData[i]))
+          }
+          console.log(JSON.stringify(sku))
+            this.addForm.sku=JSON.stringify(sku)
+          var add1=this.$qs.stringify(this.addForm)
+          console.log(this.addForm)
+         this.$axios.post("http://192.168.1.32:8080/api/duck/add",add1).then(res=>{
+           this.$message.success("添加成功");
+          }).catch(err=>console.log(err));
+
+
+
+
+
+
+          //console.log(this.tableData)
+          // console.log(this.SkuData)
+          // console.log(this.noSkuData)
+          //console.log(this.addForm)
+          //console.log(this.ShopData1)
+
+
+          /*表格中的值*/
+         /* var attrDataStr =''
+          var bb=[]
+          for (let i = 0; i <this.SkuData.length ; i++) {
+            for (let j = 0; j <this.SkuData[i].ckValues.length ; j++) {
+
+              attrDataStr ="{"+ this.SkuData[i].id+":"+this.SkuData[i].ckValues[j]+"}"
+              bb.push(attrDataStr)
+              console.log(bb)
+            }
+
+          }*/
+
+        /*var aa=[]
+          for (let i = 0; i <this.tableData.length ; i++) {
+
+              aa.push({"proId":this.addForm.typeId,"price":this.tableData[i].price,"kucun":this.tableData[i].kucun,"attrData":""})
+          }*/
+          //console.log(aa)
+
+          /*this.$axios.post("http://localhost:8080/api/duck/add?",this.$qs.stringify(this.addForm)).then(res=>{
+
+          }).catch(err=>console.log(err))*/
+        }
 
       },created:function () {
         this.getTypeData()
