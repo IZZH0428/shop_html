@@ -9,7 +9,10 @@
             <el-input v-model="searchForm.name" placeholder="名称"></el-input>
           </el-form-item>
          <el-button type="primary" @click="searchbtu">查  询</el-button>
-          <!--  <el-button type="success" @click="toadd">新增</el-button>-->
+          <router-link to="/ShopAdd">
+            <el-button type="success" >新增</el-button>
+          </router-link>
+
         </el-form>
       </div>
       <div id="BrandTable">
@@ -89,6 +92,7 @@
           width="200">
             <template slot-scope="scope">
              <el-button type="primary" icon="el-icon-edit"   @click="toupdateduck(scope.row)"></el-button>
+             <el-button type="primary" icon="el-icon-edit"   @click="toupdateData(scope.row)"></el-button>
              <el-button type="danger" icon="el-icon-delete"  @click="delDuck(scope.row.id)"></el-button>
             </template>
           </el-table-column>
@@ -110,7 +114,7 @@
 
       <!--修改模板-->
       <div>
-        <el-dialog title="属性信息" :visible.sync="updateFormFlag">
+        <el-dialog title="修改商品信息" :visible.sync="updateFormFlag">
           <el-form :model="updateForm"  ref="updateForm"   label-width="200px">
 
             <el-form-item label="商品名称" prop="name">
@@ -180,9 +184,112 @@
 
 
 
+      <!--商品属性 -->
+      <el-dialog title="商品属性信息" :visible.sync="updateDataFlag">
+      <el-form :model="updateForm"  ref="updateForm"   label-width="200px" >
+
+        <!-- 类型-->
+        <el-form-item label="商品类型" prop="typeId">
+          <el-select v-model="updateForm.typeId" placeholder="请选择" @change="getShopDataByTypeId(updateForm.typeId)">
+            <el-option
+              v-for="item in TypeDatas"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <!--是SKU属性-->
+        <div>
+
+          <el-form-item v-if="SkuData.length>0" label="商品参数  :" prop="name">
+
+            <br>
+            <el-form-item v-for="a in  SkuData" :key="a.id" :label="a.nameCH" style="margin-left: -150px">
+
+              <!--  0 下拉框     1 单选框      2  复选框   3  输入框  -->
+
+              <el-checkbox-group v-show="a.type==2" v-model="a.ckValues">
+                <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.valueCH" @change="skuChange" ></el-checkbox-button>
+              </el-checkbox-group>
+
+            </el-form-item>
+
+          </el-form-item>
+
+
+        </div>
+        <el-table
+          v-if="tableShow"
+          :data="tableData"
+          style="width: 1000px; ">
+
+
+          <el-table-column v-for="c in cols" :key="c.id" :label="c.nameCH" :prop="c.name" >
+          </el-table-column>
+
+          <el-table-column
+            label="库存"
+            width="180">
+
+            <template slot-scope="scope">
+              <el-input-number v-model="scope.row.kucun"  :step="1" :min="0" :max="100"></el-input-number>
+            </template>
+
+          </el-table-column>
+          <el-table-column
+            label="价格"
+            width="180" >
+            <template slot-scope="scope">
+              <el-input-number v-model="scope.row.price"  :step="1" :min="0" :max="100"></el-input-number>
+
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!--不是SKU属性-->
+        <div>
+
+          <el-form-item v-if="noSkuData.length>0" label="商品参数  :" prop="prop
+            name">
+
+            <br>
+            <el-form-item v-for="a in  noSkuData" :key="a.id" :label="a.nameCH" style="margin-left: -150px">
+
+              <!--  0 下拉框     1 单选框      2  复选框   3  输入框  -->
+
+              <el-select v-show="a.type==0"  placeholder="请选择"  v-model="a.ckValues1">
+                <el-option v-for="b in a.values" :key="b.id"  :label="b.valueCH" :value="b.id"></el-option>
+              </el-select>
+
+              <el-radio-group v-show="a.type==1" v-model="a.ckValues1">
+                <el-radio-button v-for="b in a.values" :key="b.id" :label="b.id" :value="b.id">{{b.valueCH}}</el-radio-button>
+              </el-radio-group>
 
 
 
+
+              <el-checkbox-group v-show="a.type==2" v-model="a.ckValues1">
+                <el-checkbox-button v-for="b in a.values" :key="b.id" :label="b.valueCH" :value="b.id" ></el-checkbox-button>
+              </el-checkbox-group>
+
+              <el-input v-show="a.type==3" v-model="a.ckValues1"></el-input>
+
+
+
+            </el-form-item>
+
+          </el-form-item>
+          <el-form-item align="right">
+            <el-button @click="updateDataFlag = false">取 消</el-button>
+            <el-button type="primary" @click="updateShopData">确 定</el-button>
+          </el-form-item>
+
+        </div>
+
+      </el-form>
+      </el-dialog>
 
 
 
@@ -218,11 +325,18 @@
             TypeDatas:[],
             TypeData:[],
             typeName:"",
+            SkuData:[],
+            noSkuData:[],
+            tableData:[],
+            cols:[],
+            tableShow:false,
+            dika:[],
             updateFormFlag:false,
             BrandData:{
               id:"",
               name:""
             },
+            updateDataFlag:false,
           }
         },methods:{
         handleCurrentChange:function(page){ //跳转页面
@@ -249,7 +363,7 @@
         imgCallBack:function(response, file, fileList){ //图片上传的回调函数
           // 赋值
           console.log(response)
-          this.addForm.imgPath=response.data;
+          this.updateForm.imgPath=response.data;
         },
 
 
@@ -339,6 +453,156 @@
             this.ShopDuckData=res.data.data;
             this.count=res.data.count;
           }).catch(err=>console.log(err))
+        },
+        toupdateData:function (row) {
+          this.updateForm.id=row.id
+          this.updateDataFlag=true;
+        },
+        /*通过分类查到属性*/
+        getShopDataByTypeId:function (typeId) {
+          this.tableShow=false;
+          this.SkuData=[];
+          this.noSkuData=[];
+          this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
+            var ShopData=res.data.data;
+            for (let i = 0; i <ShopData.length ; i++) {
+              if (ShopData[i].isSKU==0 ){
+                if(ShopData[i].type!=3){
+                  //发起请求 查询此属性对应的选项值
+                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
+                    ShopData[i].values=res.data.data
+                    //console.log(ShopData[i].values)
+                    ShopData[i].ckValues=[]
+                    this.SkuData.push(ShopData[i])
+                  }).catch(err=>console.log(err))}else {
+                  ShopData[i].ckValues=[]
+                  this.SkuData.push(ShopData[i])
+                }
+              }else {
+                if(ShopData[i].type!=3){
+                  //发起请求 查询此属性对应的选项值
+                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
+                    ShopData[i].values=res.data.data
+                    ShopData[i].ckValues1="";
+                    this.noSkuData.push(ShopData[i])
+                  }).catch(err=>console.log(err))
+                }else{
+                  ShopData[i].ckValues1="";
+                  this.noSkuData.push(ShopData[i])
+                }
+
+              }
+            }
+          }).catch(err=>console.log(err))
+          this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
+            this.ShopData1=res.data.data
+          }).catch(err=>console.log(err))
+        },
+
+
+        skuChange:function () {
+          //console.log(this.SkuData);
+          //判断是否要生成笛卡尔积
+          var a=[]
+          this.cols=[];
+          this.tableData=[];
+          let flag=true;
+          for (let i = 0; i <this.SkuData.length ; i++) {
+            if(this.SkuData[i].ckValues.length==0 ){
+              flag=false;
+              break;
+            }
+          }
+          if(flag==true) {
+            //console.log(this.SkuData)
+            for (let i = 0; i < this.SkuData.length; i++) {
+              this.cols.push({"id":this.SkuData[i].id,"nameCH":this.SkuData[i].nameCH,"name":this.SkuData[i].name});
+              a.push(this.SkuData[i].ckValues)
+            }
+            this.dika = this.discarts(a)
+
+            for (let i = 0; i <  this.dika.length; i++) {
+              let tableValue = {};
+              for (let j = 0; j <  this.dika[i].length; j++) {
+                let key = this.cols[j].name;
+                tableValue[key] = this.dika[i][j];
+              }
+              this.tableData.push(tableValue);
+            }
+          }
+          this.tableShow=flag;
+        },
+
+
+
+
+        //笛卡尔积
+        discarts:function() {
+          var twodDscartes = function (a, b) {
+            var ret = [];
+            for (var i = 0; i < a.length; i++) {
+              for (var j = 0; j < b.length; j++) {
+                ret.push(ft(a[i], b[j]));
+              }
+            }
+            return ret;
+          }
+          var ft = function (a, b) {
+            if (!(a instanceof Array))
+              a = [a];
+            var ret = a.slice(0);
+            ret.push(b);
+            return ret;
+          }
+          //多个一起做笛卡尔积
+          return (function (data) {
+            var len = data.length;
+            if (len == 0)
+              return [];
+            else if (len == 1)
+              return data[0];
+            else {
+              var r = data[0];
+              for (var i = 1; i < len; i++) {
+                r = twodDscartes(r, data[i]);
+              }
+              return r;
+            }
+          })(arguments.length > 1 ? arguments : arguments[0]);
+        },
+        updateShopData:function () {
+          let sku=[];
+          let nosku=[];
+
+          //非SKU
+          for (let i = 0; i <this.noSkuData.length; i++) {
+            let arr=this.noSkuData[i].id
+            console.log(arr)
+            let arr1=this.noSkuData[i].ckValues1;
+            let ass='{'+'"'+arr+'"'+':'+'"'+arr1+'"'+'}'
+            let saveAddvalues={proId:this.updateForm.id,attrData:ass}
+            sku.push(saveAddvalues);
+          }
+          //SKU
+          for (let i = 0; i <this.tableData.length; i++) {
+            let saveAddvalues = {
+              proId: this.updateForm.id,
+              price: this.tableData[i].price,
+              storcks: this.tableData[i].kucun
+            }
+            delete this.tableData[i].price
+            delete this.tableData[i].kucun
+            saveAddvalues.attrData = JSON.stringify(this.tableData[i]);
+            sku.push(saveAddvalues)
+            //console.log(JSON.stringify(this.tableData[i]))
+          }
+          console.log(JSON.stringify(sku))
+          this.updateForm.sku=JSON.stringify(sku)
+          var add1=this.$qs.stringify(this.updateForm)
+          console.log(this.updateForm)
+          this.$axios.post("http://192.168.1.32:8080/api/duck/updateData",add1).then(res=>{
+            this.$message.success("修改成功");
+          }).catch(err=>console.log(err));
         },
       },created:function () {
         this.queryShopDuckData(1);

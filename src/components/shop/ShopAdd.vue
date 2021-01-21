@@ -208,9 +208,7 @@
           tableData:[],
           cols:[],
           tableShow:false,
-          aa:[],
-          bb:[],
-          cc:[],
+
           dika:[],
           BrandData:{
             id:"",
@@ -417,13 +415,13 @@
             console.log(arr)
             let arr1=this.noSkuData[i].ckValues1;
             let ass='{'+'"'+arr+'"'+':'+'"'+arr1+'"'+'}'
-            let saveAddvalues={proId:this.addForm.typeId,attrData:ass}
+            let saveAddvalues={proId:this.addForm.id,attrData:ass}
             sku.push(saveAddvalues);
           }
           //SKU
           for (let i = 0; i <this.tableData.length; i++) {
             let saveAddvalues = {
-              proId: this.addForm.typeId,
+              proId: this.addForm.id,
               price: this.tableData[i].price,
               storcks: this.tableData[i].kucun
             }
