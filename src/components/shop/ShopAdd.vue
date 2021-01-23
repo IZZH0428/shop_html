@@ -36,7 +36,7 @@
             type="textarea"
             placeholder="请输入内容"
             v-model="addForm.productdecs"
-            maxlength="50"
+            maxlength="200"
             show-word-limit
           >
           </el-input>

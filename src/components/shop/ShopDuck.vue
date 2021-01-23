@@ -190,7 +190,7 @@
 
         <!-- 类型-->
         <el-form-item label="商品类型" prop="typeId">
-          <el-select v-model="updateForm.typeId" placeholder="请选择" @change="getShopDataByTypeId(updateForm.typeId)">
+          <el-select v-model="updateForm.typeId" placeholder="请选择" >
             <el-option
               v-for="item in TypeDatas"
               :key="item.id"
@@ -299,6 +299,7 @@
 </template>
 
 <script>
+  import $ from "jquery"
     export default {
         name: "ShopDuck",
         data(){
@@ -329,7 +330,7 @@
             noSkuData:[],
             tableData:[],
             cols:[],
-            tableShow:false,
+            tableShow:true,
             dika:[],
             updateFormFlag:false,
             BrandData:{
@@ -340,9 +341,10 @@
           }
         },methods:{
         handleCurrentChange:function(page){ //跳转页面
-          this.queryData(page);
-        },handleSizeChange:function(size){ //跳转页面
-          this.queryData(1);
+          this.queryShopDuckData(page);
+        },
+        handleSizeChange:function(size){ //跳转页面
+          this.queryShopDuckData(1);
         },
         queryShopDuckData:function (page) {
           this.$axios.get("http://localhost:8080/api/duck/getData?limit="+this.size+"&page="+page).then(res=>{
@@ -380,12 +382,14 @@
               this.TypeDatas[i].name=this.typeName.split("/").reverse().join("/").substr(0,this.typeName.length-1);
             }
           }).catch(err=>console.log(err))
-        },getTypeDatas:function(){
+        },
+        getTypeDatas:function(){
           for (let i = 0; i <this.TypeData.length ; i++) {
             let  node=this.TypeData[i];
             this.isChildrenNode(node);
           }
-        },isChildrenNode:function (node) {
+        },
+        isChildrenNode:function (node) {
           let rs=true; //标示
           for (let i = 0; i <this.TypeData.length ; i++) {
             if(node.id==this.TypeData[i].pid){
@@ -412,7 +416,7 @@
           }
         },
 
-      changetypeId:function (row, column) {
+        changetypeId:function (row, column) {
         for (let i = 0; i <this.TypeData.length ; i++) {
           if (row.typeId==this.TypeData[i].id){
             return this.TypeData[i].name.substr(this.TypeData[i].name.lastIndexOf("/")+1)
@@ -454,49 +458,87 @@
             this.count=res.data.count;
           }).catch(err=>console.log(err))
         },
-        toupdateData:function (row) {
+        toupdateData: function (row) {
+          this.updateForm.typeId =row.typeId
+
           this.updateForm.id=row.id
           this.updateDataFlag=true;
+          this.getShopDataByTypeId(row.id,row.typeId)
         },
         /*通过分类查到属性*/
-        getShopDataByTypeId:function (typeId) {
-          this.tableShow=false;
+        getShopDataByTypeId:function (id,typeId) {
           this.SkuData=[];
           this.noSkuData=[];
+          let skuAll=[];
+          let skuattr=[];
+          let noskuattr=[];
+                  //发起请求 查询此属性对应的选项值
+                  $.get({
+                    url:"http://localhost:8080/api/duck/queryshopatt",
+                    data:{id:id}
+                    ,async:false,
+                    success:function (res) {
+                     //console.log(res)
+                      for (let i = 0; i <res.data.length ; i++) {
+                        if (res.data[i].price!=null){
+                          skuAll.push(res.data[i]);
+                          skuattr.push(JSON.parse(res.data[i].attrData))
+                          console.log(skuAll)
+                        }else {
+                          noskuattr.push(JSON.parse(res.data[i].attrData))
+                          //console.log(noskuattr)
+                        }
+                      }
+                    }
+                })
           this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
-            var ShopData=res.data.data;
-            for (let i = 0; i <ShopData.length ; i++) {
-              if (ShopData[i].isSKU==0 ){
-                if(ShopData[i].type!=3){
-                  //发起请求 查询此属性对应的选项值
-                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
-                    ShopData[i].values=res.data.data
-                    //console.log(ShopData[i].values)
-                    ShopData[i].ckValues=[]
-                    this.SkuData.push(ShopData[i])
-                  }).catch(err=>console.log(err))}else {
-                  ShopData[i].ckValues=[]
-                  this.SkuData.push(ShopData[i])
-                }
-              }else {
-                if(ShopData[i].type!=3){
-                  //发起请求 查询此属性对应的选项值
-                  this.$axios.get("http://localhost:8080/api/value/getDataByAttId?attId="+ShopData[i].id).then(res=>{
-                    ShopData[i].values=res.data.data
-                    ShopData[i].ckValues1="";
-                    this.noSkuData.push(ShopData[i])
-                  }).catch(err=>console.log(err))
-                }else{
-                  ShopData[i].ckValues1="";
-                  this.noSkuData.push(ShopData[i])
-                }
+                  //console.log(res.data.data)
+            let shopDatas=res.data.data
+            for (let i = 0; i <shopDatas.length ; i++) {
+              //sku属性
+                if (shopDatas[i].isSKU==0){
+                  shopDatas[i].ckValues=[];
+                  for (let j = 0; j <skuattr.length ; j++) {
+                    if (shopDatas[i].ckValues.indexOf(skuattr[j][shopDatas[i].name])==-1){
+                      shopDatas[i].ckValues.push(skuattr[j][shopDatas[i].name])
+                    }
+                  }
+                  $.get({
+                    url:"http://localhost:8080/api/value/getDataByAttId",
+                    data:{attId:shopDatas[i].id}
+                    ,async:false,
+                    success:function (res) {
+                      //console.log(res)
+                      shopDatas[i].values=res.data
+                    }
+                  })
+                  this.SkuData.push(shopDatas[i])
+                }else if(shopDatas[i].isSKU==1){
+                  $.get({
+                    url:"http://localhost:8080/api/value/getDataByAttId",
+                    data:{attId:shopDatas[i].id}
+                    ,async:false,
+                    success:function (res) {
+                      //console.log(res)
+                      shopDatas[i].values=res.data
+                      shopDatas[i].ckValues1=""                    }
+                  })
+                  console.log(noskuattr)
+                  this.noSkuData.push(shopDatas[i])
+                  let hh=""
+                  for (let j = 0; j <noskuattr.length ; j++) {
+                    if(noskuattr[j][shopDatas[i].name]!=undefined){
+                      hh=noskuattr[j][shopDatas[i].name]
+                       this.noSkuData[j].ckValues1 =hh
+                    }
 
-              }
+                  }
+                }
             }
-          }).catch(err=>console.log(err))
-          this.$axios.get("http://localhost:8080/api/shopData/getDataByTypeId?typeId="+typeId).then(res=>{
-            this.ShopData1=res.data.data
-          }).catch(err=>console.log(err))
+            this.skuChange1(skuAll)
+            //console.log(this.noSkuData)
+            }).catch(err=>console.log(err))
+
         },
 
 
@@ -527,12 +569,46 @@
                 let key = this.cols[j].name;
                 tableValue[key] = this.dika[i][j];
               }
+
               this.tableData.push(tableValue);
             }
           }
           this.tableShow=flag;
         },
+        skuChange1:function (sku) {
+          //console.log(this.SkuData);
+          //判断是否要生成笛卡尔积
+          var a=[]
+          this.cols=[];
+          this.tableData=[];
+          let flag=true;
+          for (let i = 0; i <this.SkuData.length ; i++) {
+            if(this.SkuData[i].ckValues.length==0 ){
+              flag=false;
+              break;
+            }
+          }
+          if(flag==true) {
+            //console.log(this.SkuData)
+            for (let i = 0; i < this.SkuData.length; i++) {
+              this.cols.push({"id":this.SkuData[i].id,"nameCH":this.SkuData[i].nameCH,"name":this.SkuData[i].name});
+              a.push(this.SkuData[i].ckValues)
+            }
+            this.dika = this.discarts(a)
 
+            for (let i = 0; i <  this.dika.length; i++) {
+              let tableValue = {};
+              for (let j = 0; j <  this.dika[i].length; j++) {
+                let key = this.cols[j].name;
+                tableValue[key] = this.dika[i][j];
+              }
+              tableValue.price=sku[i].price
+              tableValue.kucun=sku[i].storcks
+              this.tableData.push(tableValue);
+            }
+          }
+          this.tableShow=flag;
+        },
 
 
 
@@ -570,6 +646,9 @@
             }
           })(arguments.length > 1 ? arguments : arguments[0]);
         },
+
+
+
         updateShopData:function () {
           let sku=[];
           let nosku=[];
@@ -600,11 +679,12 @@
           this.updateForm.sku=JSON.stringify(sku)
           var add1=this.$qs.stringify(this.updateForm)
           console.log(this.updateForm)
-          this.$axios.post("http://192.168.1.32:8080/api/duck/updateData",add1).then(res=>{
+          this.$axios.post("http://localhost:8080/api/duck/updateData",add1).then(res=>{
             this.$message.success("修改成功");
             this.updateDataFlag=false;
           }).catch(err=>console.log(err));
         },
+       
       },created:function () {
         this.queryShopDuckData(1);
         this.getTypeData();
