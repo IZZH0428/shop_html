@@ -9,10 +9,10 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/test'
+      component: () => import(/* webpackChunkName: "home" */ '../components/Login/Login.vue'),
     },
     {
-      path: '/',
+      path: '/Home',
       component: () => import(/* webpackChunkName: "home" */ '../components/common/Home.vue'),
       meta: { title: '自述文件' },
       children: [
