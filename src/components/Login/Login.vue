@@ -20,7 +20,10 @@
 
           <div style="margin-left: 105px;">
             <el-button type="success" round @click="login">登    录</el-button>
-            <el-button type="primary" round>注    册</el-button>
+            <router-link to="/ZhuCe">
+              <el-button type="primary" round>注    册</el-button>
+            </router-link>
+
            <!-- <button type="button" class="layui-btn layui-btn-lg layui-btn-radius layui-btn-normal" id="log" onclick="login()">登录</button>
             <button type="button" class="layui-btn layui-btn-lg layui-btn-radius layui-btn-warm" onclick="zhuce()">注册</button>-->
           </div>
@@ -50,7 +53,26 @@
           login:function () {
             if (this.name!=""){
                 if (this.password!=""){
+                  this.$axios.post("http://localhost:8080/api/login/userLogin?name="+this.name+"&password="+this.password).then(res=>{
+                      if (res.data.msg==1){
+                        this.$message({
+                          message: '警告哦，账号不存在',
+                          type: 'warning'
+                        });
+                      }  if (res.data.msg==2){
+                        this.$message({
+                          message: '警告哦，账号与密码不一致',
+                          type: 'warning'
+                        });
+                      } if (res.data.msg==3){
+                        this.$message({
+                          message: '恭喜登录成功',
+                          type: 'success'
+                        });
+                      this.$router.push("/Home");
+                      }
 
+                  }).catch(err=>console.log(err))
                 } else{
                   this.$message({
                     message: '警告哦，密码不可为空',
