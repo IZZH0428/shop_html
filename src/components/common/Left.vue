@@ -83,6 +83,15 @@
               },{
                 index: 'ShopDuck',
                 title: '商品展示'
+              },{
+                index: 'Menu',
+                title: '权限管理'
+              },{
+                index: 'Role',
+                title: '角色管理'
+              },{
+                index: 'User',
+                title: '用户管理'
               }
             ]
           },

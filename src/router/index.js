@@ -46,6 +46,18 @@ export default new Router({
           path: '/ShopDuck',
           component: () => import(/* webpackChunkName: "dashboard" */ '../components/shop/ShopDuck.vue'),
           meta: { title: '商品展示' }
+        },{
+          path: '/Menu',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/Menu/Menu.vue'),
+          meta: { title: '权限管理' }
+        },{
+          path: '/Role',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/Menu/Role.vue'),
+          meta: { title: '角色管理' }
+        },{
+          path: '/User',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../components/Menu/User.vue'),
+          meta: { title: '用户管理' }
         }
 
       ]
